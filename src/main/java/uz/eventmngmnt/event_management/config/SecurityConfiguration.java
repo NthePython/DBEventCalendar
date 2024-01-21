@@ -27,10 +27,11 @@ public class SecurityConfiguration {
 //                .addFilterBefore(new JwtAuthenticationFilter(jwtService), UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests((authorize) -> authorize
                         .requestMatchers("/api/**").permitAll()
-                        .anyRequest().authenticated())
+                        .anyRequest())
                 .sessionManagement((session) ->
                         session
                                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .cors(AbstractHttpConfigurer::disable)
                 .authenticationProvider(new DaoAuthenticationProvider());
 
 
