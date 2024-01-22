@@ -3,6 +3,7 @@ package uz.eventmngmnt.event_management.controller.api;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import uz.eventmngmnt.event_management.entity.UserSignUp;
 import uz.eventmngmnt.event_management.entity.Users;
 import uz.eventmngmnt.event_management.service.Impl.UsersServiceImpl;
 
@@ -25,6 +26,11 @@ public class UsersController {
     @PostMapping("/save")
     public ResponseEntity<?> save(@RequestBody Users user) {
         return usersService.save(user);
+    }
+
+    @PostMapping("/signUp")
+    public ResponseEntity<?> signUp(@RequestBody UserSignUp user) {
+        return usersService.signUp(user);
     }
 
     @PutMapping("/update/{id}")

@@ -2,6 +2,7 @@ package uz.eventmngmnt.event_management.service.Impl;
 
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import uz.eventmngmnt.event_management.entity.UserSignUp;
 import uz.eventmngmnt.event_management.entity.Users;
 import uz.eventmngmnt.event_management.repository.UsersRepository;
 import uz.eventmngmnt.event_management.service.Service;
@@ -68,5 +69,13 @@ public class UsersServiceImpl extends Service<Users> {
 
         repository.deleteById(id);
         return ResponseEntity.ok(id);
+    }
+
+    public ResponseEntity<?> signUp(UserSignUp user) {
+        if (user == null)
+            throw new IllegalArgumentException("User is null");
+
+        Users new_user = new Users(null, user.getFirstName(), user.getLastName(), user.getPhoneNumber(), user.getEmail(), user.getUsername(), user.getPassword(), null);
+        return ResponseEntity.ok(new_user.getId());
     }
 }
