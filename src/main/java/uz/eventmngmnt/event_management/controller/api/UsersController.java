@@ -22,12 +22,12 @@ public class UsersController {
         return usersService.getById(id);
     }
 
-    @GetMapping("/save")
+    @PostMapping("/save")
     public ResponseEntity<?> save(@RequestBody Users user) {
         return usersService.save(user);
     }
 
-    @GetMapping("/update/{id}")
+    @PutMapping("/update/{id}")
     public ResponseEntity<?> update(@PathVariable Long id, @RequestBody Users user) {
         return usersService.update(id, user);
     }
