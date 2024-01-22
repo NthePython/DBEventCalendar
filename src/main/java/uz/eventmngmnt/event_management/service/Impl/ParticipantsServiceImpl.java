@@ -2,7 +2,10 @@ package uz.eventmngmnt.event_management.service.Impl;
 
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import uz.eventmngmnt.event_management.entity.Balance;
+import uz.eventmngmnt.event_management.entity.Events;
 import uz.eventmngmnt.event_management.entity.Participants;
+import uz.eventmngmnt.event_management.entity.enums.Roles;
 import uz.eventmngmnt.event_management.repository.ParticipantsRepository;
 import uz.eventmngmnt.event_management.service.Service;
 
@@ -50,6 +53,15 @@ public class ParticipantsServiceImpl extends Service<Participants> {
         return participantsRepository.existsById(id);
     }
 
+    public ResponseEntity<?> getOrganizerId(Long eventId) {
+        if (eventId == null)
+            throw new IllegalArgumentException("Id is null");
+
+        Participants organizer = participantsRepository.findByIdAndRole(eventId, Roles.ORGANIZER).orElseThrow(()
+                -> new NoSuchElementException(eventId + " Event not found"));
+        return ResponseEntity.ok(organizer.getUserId());
+    }
+
     @Override
     public ResponseEntity<?> delete(Long id) {
         if (id == null)
@@ -64,6 +76,22 @@ public class ParticipantsServiceImpl extends Service<Participants> {
             throw new IllegalArgumentException("Unable to register, Id shouldn't be null");
         if (userService.getById(participants.getUserId()) == null)
             throw new NoSuchElementException(participants.getUserId() + " user not found");
+
+        Events event = (Events) eventService.getById(participants.getEventId()).getBody();
+        if (event == null)
+            throw new NoSuchElementException(participants.getEventId() + " event not found");
+
+        Balance balance = balanceService.getByUserId(participants.getUserId());
+        if (balance.getBalance() < event.getCost())
+            throw new IllegalArgumentException("Not enough money");
+        else {
+            balance.setBalance(balance.getBalance() - event.getCost());
+            Long organizerId = (Long) getOrganizerId(participants.getEventId()).getBody();
+            Balance organizerBalance = balanceService.getByUserId(organizerId);
+            organizerBalance.setBalance(organizerBalance.getBalance() + event.getCost());
+            balanceService.update(balance.getId(), balance);
+            balanceService.update(organizerBalance.getId(), organizerBalance);
+        }
 
         return ResponseEntity.ok(participantsRepository.save(participants).getId());
     }

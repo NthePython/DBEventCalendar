@@ -3,6 +3,7 @@ package uz.eventmngmnt.event_management.service.Impl;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import uz.eventmngmnt.event_management.entity.UserSignUp;
+import uz.eventmngmnt.event_management.entity.UserWithBalance;
 import uz.eventmngmnt.event_management.entity.Users;
 import uz.eventmngmnt.event_management.repository.UsersRepository;
 import uz.eventmngmnt.event_management.service.Service;
@@ -14,6 +15,7 @@ import java.util.NoSuchElementException;
 public class UsersServiceImpl extends Service<Users> {
 
     private final UsersRepository repository;
+    private final BalanceServiceImpl balanceService;
 //    private final ValidationService validationService = new ValidationService();
 
     @Override
@@ -27,7 +29,16 @@ public class UsersServiceImpl extends Service<Users> {
             throw new IllegalArgumentException("Id is null");
 
         Users user = repository.findById(id).orElseThrow(() -> new NoSuchElementException(id + " User not found"));
-        return ResponseEntity.ok(user);
+        Double balance = balanceService.getByUserId(id).getBalance();
+        UserWithBalance response = new UserWithBalance();
+        response.setId(user.getId());
+        response.setFirstName(user.getFirstName());
+        response.setLastName(user.getLastName());
+        response.setPhoneNumber(user.getPhoneNumber());
+        response.setEmail(user.getEmail());
+        response.setUsername(user.getUsername());
+        response.setBalance(balance);
+        return ResponseEntity.ok(response);
     }
 
     @Override
