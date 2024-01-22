@@ -27,10 +27,14 @@ public class ParticipantsController {
         return participantsService.save(participant);
     }
 
-//    @PostMapping("/registerToAnEvent")
-//    public ResponseEntity<?> registerToAnEvent(@RequestBody Participants participant) {
-//        return participantsService.registerToAnEvent(participant);
-//    }
+    @PostMapping("/registerToAnEvent")
+    public ResponseEntity<?> registerToAnEvent(@RequestBody Participants participant) {
+        try {
+            return participantsService.registerToAnEvent(participant);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
 
     @PutMapping("/update/{id}")
     public ResponseEntity<?> update(@PathVariable Long id, @RequestBody Participants participant) {

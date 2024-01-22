@@ -5,10 +5,15 @@ import org.springframework.http.ResponseEntity;
 import uz.eventmngmnt.event_management.entity.Balance;
 import uz.eventmngmnt.event_management.entity.Events;
 import uz.eventmngmnt.event_management.entity.Participants;
+import uz.eventmngmnt.event_management.entity.Transactions;
 import uz.eventmngmnt.event_management.entity.enums.Roles;
+import uz.eventmngmnt.event_management.entity.enums.TransactionStatus;
+import uz.eventmngmnt.event_management.entity.enums.TransactionType;
 import uz.eventmngmnt.event_management.repository.ParticipantsRepository;
 import uz.eventmngmnt.event_management.service.Service;
 
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.NoSuchElementException;
 
 @org.springframework.stereotype.Service
@@ -17,6 +22,7 @@ public class ParticipantsServiceImpl extends Service<Participants> {
     private final UsersServiceImpl userService;
     private final EventsService eventService;
     private final BalanceServiceImpl balanceService;
+    private final TransactionsServiceImpl transactionsService;
 
     private final ParticipantsRepository participantsRepository;
     @Override
@@ -57,7 +63,7 @@ public class ParticipantsServiceImpl extends Service<Participants> {
         if (eventId == null)
             throw new IllegalArgumentException("Id is null");
 
-        Participants organizer = participantsRepository.findByIdAndRole(eventId, Roles.ORGANIZER).orElseThrow(()
+        Participants organizer = participantsRepository.findByEventIdAndRole(eventId, Roles.ORGANIZER).orElseThrow(()
                 -> new NoSuchElementException(eventId + " Event not found"));
         return ResponseEntity.ok(organizer.getUserId());
     }
@@ -82,16 +88,57 @@ public class ParticipantsServiceImpl extends Service<Participants> {
             throw new NoSuchElementException(participants.getEventId() + " event not found");
 
         Balance balance = balanceService.getByUserId(participants.getUserId());
-        if (balance.getBalance() < event.getCost())
+
+        // Initializing credit transaction
+        Transactions credit = new Transactions();
+        credit.setStartTime(Timestamp.valueOf(LocalDateTime.now()));
+        credit.setBalanceId(balance.getId());
+        credit.setEventId(event.getId());
+        credit.setSum(event.getCost());
+        credit.setType(TransactionType.CREDIT);
+        credit.setStatus(TransactionStatus.PENDING);
+        transactionsService.save(credit);
+
+        // Failing transaction if user doesn't have enough money
+        if (balance.getBalance() < event.getCost()) {
+            credit.setEndTime(Timestamp.valueOf(LocalDateTime.now()));
+            credit.setStatus(TransactionStatus.FAILED);
+            transactionsService.update(credit.getId(), credit);
             throw new IllegalArgumentException("Not enough money");
-        else {
-            balance.setBalance(balance.getBalance() - event.getCost());
-            Long organizerId = (Long) getOrganizerId(participants.getEventId()).getBody();
-            Balance organizerBalance = balanceService.getByUserId(organizerId);
-            organizerBalance.setBalance(organizerBalance.getBalance() + event.getCost());
-            balanceService.update(balance.getId(), balance);
-            balanceService.update(organizerBalance.getId(), organizerBalance);
         }
+
+        // Preparing participant's balance for update
+        balance.setBalance(balance.getBalance() - event.getCost());
+
+        // Getting organizer's details
+        Long organizerId = (Long) getOrganizerId(event.getId()).getBody();
+        Balance organizerBalance = balanceService.getByUserId(organizerId);
+
+        // Initializing debit transaction
+        Transactions debit = new Transactions();
+        debit.setStartTime(Timestamp.valueOf(LocalDateTime.now()));
+        debit.setBalanceId(balance.getId());
+        debit.setEventId(event.getId());
+        debit.setSum(event.getCost());
+        debit.setType(TransactionType.DEBIT);
+        debit.setStatus(TransactionStatus.PENDING);
+        transactionsService.save(debit);
+
+        // Preparing organizer's balance for update
+        organizerBalance.setBalance(organizerBalance.getBalance() + event.getCost());
+
+        // Updating balances and completing credit transaction
+        balanceService.update(balance.getId(), balance);
+        credit.setStatus(TransactionStatus.SUCCESSFUL);
+        credit.setEndTime(Timestamp.valueOf(LocalDateTime.now()));
+        transactionsService.update(credit.getId(), credit);
+
+        // Updating balances and completing debit transaction
+        balanceService.update(organizerBalance.getId(), organizerBalance);
+        debit.setStatus(TransactionStatus.SUCCESSFUL);
+        debit.setEndTime(Timestamp.valueOf(LocalDateTime.now()));
+        transactionsService.update(debit.getId(), debit);
+
 
         return ResponseEntity.ok(participantsRepository.save(participants).getId());
     }
