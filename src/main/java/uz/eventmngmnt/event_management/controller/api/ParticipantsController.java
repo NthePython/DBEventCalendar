@@ -27,6 +27,11 @@ public class ParticipantsController {
         return participantsService.save(participant);
     }
 
+//    @PostMapping("/registerToAnEvent")
+//    public ResponseEntity<?> registerToAnEvent(@RequestBody Participants participant) {
+//        return participantsService.registerToAnEvent(participant);
+//    }
+
     @PutMapping("/update/{id}")
     public ResponseEntity<?> update(@PathVariable Long id, @RequestBody Participants participant) {
         return participantsService.update(id, participant);

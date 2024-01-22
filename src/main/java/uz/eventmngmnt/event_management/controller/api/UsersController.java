@@ -30,7 +30,11 @@ public class UsersController {
 
     @PostMapping("/signUp")
     public ResponseEntity<?> signUp(@RequestBody UserSignUp user) {
-        return usersService.signUp(user);
+        try {
+            return usersService.signUp(user);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
     @PutMapping("/update/{id}")

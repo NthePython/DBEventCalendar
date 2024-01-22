@@ -75,6 +75,9 @@ public class UsersServiceImpl extends Service<Users> {
         if (user == null)
             throw new IllegalArgumentException("User is null");
 
+        if (!user.getPassword().equals(user.getPassword2()))
+            throw new IllegalArgumentException("Password and ConfirmPassword are not equal");
+
         Users new_user = new Users(null, user.getFirstName(), user.getLastName(), user.getPhoneNumber(), user.getEmail(), user.getUsername(), user.getPassword(), null);
         return ResponseEntity.ok(new_user.getId());
     }

@@ -11,6 +11,9 @@ import java.util.NoSuchElementException;
 @org.springframework.stereotype.Service
 @AllArgsConstructor
 public class ParticipantsServiceImpl extends Service<Participants> {
+    private final UsersServiceImpl userService;
+    private final EventsService eventService;
+    private final BalanceServiceImpl balanceService;
 
     private final ParticipantsRepository participantsRepository;
     @Override
@@ -54,5 +57,14 @@ public class ParticipantsServiceImpl extends Service<Participants> {
 
         participantsRepository.deleteById(id);
         return ResponseEntity.ok("Deleted");
+    }
+
+    public ResponseEntity<?> registerToAnEvent(Participants participants) {
+        if (participants.getUserId() == null || participants.getEventId() == null)
+            throw new IllegalArgumentException("Unable to register, Id shouldn't be null");
+        if (userService.getById(participants.getUserId()) == null)
+            throw new NoSuchElementException(participants.getUserId() + " user not found");
+
+        return ResponseEntity.ok(participantsRepository.save(participants).getId());
     }
 }
