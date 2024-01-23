@@ -22,6 +22,16 @@ public class ParticipantsController {
         return participantsService.getById(id);
     }
 
+    @GetMapping("/getByUserId/{id}")
+    public ResponseEntity<?> getByUserId(@PathVariable Long id) {
+        return participantsService.getByUserId(id);
+    }
+
+    @GetMapping("/getByEventId/{id}")
+    public ResponseEntity<?> getByEventId(@PathVariable Long id) {
+        return participantsService.getByEventId(id);
+    }
+
     @PostMapping("/save")
     public ResponseEntity<?> save(@RequestBody Participants participant) {
         return participantsService.save(participant);

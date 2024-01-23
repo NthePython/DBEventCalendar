@@ -6,6 +6,7 @@ import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
 import uz.eventmngmnt.event_management.entity.*;
+import uz.eventmngmnt.event_management.entity.enums.Roles;
 import uz.eventmngmnt.event_management.repository.*;
 
 import java.sql.Time;
@@ -45,6 +46,7 @@ public class AppInit implements ApplicationRunner {
 
         participant.setUserId(user.getId());
         participant.setEventId(event.getId());
+        participant.setRole(Roles.ORGANIZER);
         participantsRepository.save(participant);
 
         balance.setUserId(user.getId());

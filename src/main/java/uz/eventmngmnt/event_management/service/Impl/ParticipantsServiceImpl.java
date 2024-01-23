@@ -39,6 +39,20 @@ public class ParticipantsServiceImpl extends Service<Participants> {
         return ResponseEntity.ok(participants);
     }
 
+    public ResponseEntity<?> getByUserId(Long id) {
+        if (id == null)
+            throw new IllegalArgumentException("Id is null");
+
+        return ResponseEntity.ok(participantsRepository.findByUserId(id));
+    }
+
+    public ResponseEntity<?> getByEventId(Long id) {
+        if (id == null)
+            throw new IllegalArgumentException("Id is null");
+
+        return ResponseEntity.ok(participantsRepository.findByEventId(id));
+    }
+
     @Override
     public ResponseEntity<?> save(Participants participants) {
         return ResponseEntity.ok(participantsRepository.save(participants).getId());
