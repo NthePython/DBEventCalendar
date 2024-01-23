@@ -1,5 +1,6 @@
 package uz.eventmngmnt.event_management.config;
 
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
@@ -7,6 +8,7 @@ import org.springframework.stereotype.Component;
 import uz.eventmngmnt.event_management.entity.*;
 import uz.eventmngmnt.event_management.repository.*;
 
+import java.sql.Time;
 import java.sql.Timestamp;
 
 @Component
@@ -24,6 +26,14 @@ public class AppInit implements ApplicationRunner {
         Participants participant = new Participants();
         Balance balance = new Balance();
         Transactions transaction = new Transactions();
+
+        user.setFirstName("First");
+        user.setLastName("Last");
+        user.setPhoneNumber("+998901234567");
+        user.setEmail("2110021@newuu.uz");
+        user.setUsername("Username");
+        user.setPassword("Password");
+        usersRepository.save(user);
 
         event.setName("Event");
         event.setDescription("Description");
