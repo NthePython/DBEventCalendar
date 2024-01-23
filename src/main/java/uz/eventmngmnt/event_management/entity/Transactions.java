@@ -19,7 +19,6 @@ public class Transactions {
     private Long id;
     private Long userId;
     private Long eventId;
-    @Column(nullable = false)
     private Timestamp startTime;
     private Timestamp endTime;
     private Double sum;

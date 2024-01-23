@@ -3,6 +3,7 @@ package uz.eventmngmnt.event_management.controller.api;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import uz.eventmngmnt.event_management.entity.UserSignIn;
 import uz.eventmngmnt.event_management.entity.UserSignUp;
 import uz.eventmngmnt.event_management.entity.Users;
 import uz.eventmngmnt.event_management.service.Impl.UsersServiceImpl;
@@ -32,6 +33,24 @@ public class UsersController {
     public ResponseEntity<?> signUp(@RequestBody UserSignUp user) {
         try {
             return usersService.signUp(user);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @PostMapping("/signIn")
+    public ResponseEntity<?> signIn(@RequestBody UserSignIn creds) {
+        try {
+            return usersService.signIn(creds.getUsername(), creds.getPassword());
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @PutMapping("/topUpBalance/{id}")
+    public ResponseEntity<?> topUpBalance(@PathVariable Long id, @RequestBody Double amount) {
+        try {
+            return usersService.topUpBalance(id, amount);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }

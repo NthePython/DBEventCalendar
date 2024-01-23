@@ -2,6 +2,7 @@ package uz.eventmngmnt.event_management.service.Impl;
 
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import uz.eventmngmnt.event_management.entity.Balance;
 import uz.eventmngmnt.event_management.entity.UserSignUp;
 import uz.eventmngmnt.event_management.entity.UserWithBalance;
 import uz.eventmngmnt.event_management.entity.Users;
@@ -48,7 +49,9 @@ public class UsersServiceImpl extends Service<Users> {
 
 //        validation(users);
 
-        return ResponseEntity.ok(repository.save(users).getId());
+        Long userId = repository.save(users).getId();
+        balanceService.save(new Balance(null, userId, 0.0));
+        return ResponseEntity.ok(userId);
 
     }
 
@@ -90,6 +93,32 @@ public class UsersServiceImpl extends Service<Users> {
             throw new IllegalArgumentException("Password and ConfirmPassword are not equal");
 
         Users new_user = new Users(null, user.getFirstName(), user.getLastName(), user.getPhoneNumber(), user.getEmail(), user.getUsername(), user.getPassword(), null);
+        new_user = repository.save(new_user);
+        Balance balance = new Balance(null, new_user.getId(), 0.0);
+        balanceService.save(balance);
         return ResponseEntity.ok(new_user.getId());
+    }
+
+    public ResponseEntity<?> signIn(String username, String password) {
+        if (username == null || password == null)
+            throw new IllegalArgumentException("Username or password is null");
+
+        try{
+            Users user = repository.findByUsernameAndPassword(username, password).orElseThrow(() -> new NoSuchElementException(username + " User not found"));
+            return ResponseEntity.ok(user.getId());
+        } catch (NoSuchElementException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    public ResponseEntity<?> topUpBalance(Long userId, Double amount) {
+        if (userId == null || amount == null)
+            throw new IllegalArgumentException("Id or amount is null");
+
+        repository.findById(userId).orElseThrow(() -> new NoSuchElementException(userId + " User not found"));
+        Balance balance = balanceService.getByUserId(userId);
+        balance.setBalance(balance.getBalance() + amount);
+        balanceService.update(userId, balance);
+        return ResponseEntity.ok("Balance updated");
     }
 }
