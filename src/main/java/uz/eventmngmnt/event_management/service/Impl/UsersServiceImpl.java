@@ -9,6 +9,7 @@ import uz.eventmngmnt.event_management.entity.Users;
 import uz.eventmngmnt.event_management.repository.UsersRepository;
 import uz.eventmngmnt.event_management.service.Service;
 
+import java.sql.Timestamp;
 import java.util.NoSuchElementException;
 
 @org.springframework.stereotype.Service
@@ -49,6 +50,8 @@ public class UsersServiceImpl extends Service<Users> {
 
 //        validation(users);
 
+        Timestamp joinedDate = new Timestamp(System.currentTimeMillis());
+        users.setJoinedDate(joinedDate);
         Long userId = repository.save(users).getId();
         balanceService.save(new Balance(null, userId, 0.0));
         return ResponseEntity.ok(userId);
@@ -92,7 +95,9 @@ public class UsersServiceImpl extends Service<Users> {
         if (!user.getPassword().equals(user.getPassword2()))
             throw new IllegalArgumentException("Password and ConfirmPassword are not equal");
 
-        Users new_user = new Users(null, user.getFirstName(), user.getLastName(), user.getPhoneNumber(), user.getEmail(), user.getUsername(), user.getPassword(), null);
+        Timestamp joinedDate = new Timestamp(System.currentTimeMillis());
+
+        Users new_user = new Users(null, user.getFirstName(), user.getLastName(), user.getPhoneNumber(), user.getEmail(), user.getUsername(), user.getPassword(), joinedDate);
         new_user = repository.save(new_user);
         Balance balance = new Balance(null, new_user.getId(), 0.0);
         balanceService.save(balance);
