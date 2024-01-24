@@ -1,7 +1,9 @@
 package uz.eventmngmnt.event_management.service.Impl;
 
 import lombok.AllArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import uz.eventmngmnt.event_management.entity.Balance;
 import uz.eventmngmnt.event_management.entity.UserSignUp;
 import uz.eventmngmnt.event_management.entity.UserWithBalance;
@@ -15,6 +17,8 @@ import java.util.NoSuchElementException;
 @org.springframework.stereotype.Service
 @AllArgsConstructor
 public class UsersServiceImpl extends Service<Users> {
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     private final UsersRepository repository;
     private final BalanceServiceImpl balanceService;
@@ -53,6 +57,7 @@ public class UsersServiceImpl extends Service<Users> {
 
         Timestamp joinedDate = new Timestamp(System.currentTimeMillis());
         users.setJoinedDate(joinedDate);
+        users.setPassword(passwordEncoder.encode(users.getPassword()));
         Long userId = repository.save(users).getId();
         balanceService.save(new Balance(null, userId, 0.0));
         return ResponseEntity.ok(userId);
@@ -98,7 +103,7 @@ public class UsersServiceImpl extends Service<Users> {
 
         Timestamp joinedDate = new Timestamp(System.currentTimeMillis());
 
-        Users new_user = new Users(null, user.getFirstName(), user.getLastName(), user.getPhoneNumber(), user.getEmail(), user.getUsername(), user.getPassword(), joinedDate);
+        Users new_user = new Users(null, user.getFirstName(), user.getLastName(), user.getPhoneNumber(), user.getEmail(), user.getUsername(), passwordEncoder.encode(user.getPassword()), joinedDate);
         new_user = repository.save(new_user);
         Balance balance = new Balance(null, new_user.getId(), 0.0);
         balanceService.save(balance);
@@ -110,8 +115,11 @@ public class UsersServiceImpl extends Service<Users> {
             throw new IllegalArgumentException("Username or password is null");
 
         try{
-            Users user = repository.findByUsernameAndPassword(username, password).orElseThrow(() -> new NoSuchElementException(username + " User not found"));
-            return ResponseEntity.ok(user.getId());
+//            Users user = repository.findByUsernameAndPassword(username, password).orElseThrow(() -> new NoSuchElementException(username + " User not found"));
+            Users user = repository.findByUsername(username).orElseThrow(() -> new NoSuchElementException(username + " User not found"));
+            if (passwordEncoder.matches(password, user.getPassword()))
+                return ResponseEntity.ok(user.getId());
+            else throw new IllegalArgumentException("Password is incorrect");
         } catch (NoSuchElementException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }

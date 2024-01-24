@@ -60,4 +60,9 @@ public class UsersController {
     public ResponseEntity<?> update(@PathVariable Long id, @RequestBody Users user) {
         return usersService.update(id, user);
     }
+
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<?> delete(@PathVariable Long id) {
+        return usersService.delete(id);
+    }
 }

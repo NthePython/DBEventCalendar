@@ -6,5 +6,5 @@ import uz.eventmngmnt.event_management.entity.Users;
 import java.util.Optional;
 
 public interface UsersRepository extends JpaRepository<Users, Long> {
-    Optional<Users> findByUsernameAndPassword(String username, String password);
+    Optional<Users> findByUsername(String username);
 }
