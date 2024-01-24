@@ -40,6 +40,7 @@ public class UsersServiceImpl extends Service<Users> {
         response.setEmail(user.getEmail());
         response.setUsername(user.getUsername());
         response.setBalance(balance);
+        response.setJoinedDate(user.getJoinedDate());
         return ResponseEntity.ok(response);
     }
 
