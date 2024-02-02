@@ -74,6 +74,8 @@ public class UsersServiceImpl extends Service<Users> {
 
 //        validation(sessions);
 
+        users.setPassword(passwordEncoder.encode(users.getPassword()));
+
         return ResponseEntity.ok(repository.save(users).getId());
 
     }
