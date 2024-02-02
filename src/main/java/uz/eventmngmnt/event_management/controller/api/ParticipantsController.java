@@ -22,9 +22,28 @@ public class ParticipantsController {
         return participantsService.getById(id);
     }
 
+    @GetMapping("/getByUserId/{id}")
+    public ResponseEntity<?> getByUserId(@PathVariable Long id) {
+        return participantsService.getByUserId(id);
+    }
+
+    @GetMapping("/getByEventId/{id}")
+    public ResponseEntity<?> getByEventId(@PathVariable Long id) {
+        return participantsService.getByEventId(id);
+    }
+
     @PostMapping("/save")
     public ResponseEntity<?> save(@RequestBody Participants participant) {
         return participantsService.save(participant);
+    }
+
+    @PostMapping("/registerToAnEvent")
+    public ResponseEntity<?> registerToAnEvent(@RequestBody Participants participant) {
+        try {
+            return participantsService.registerToAnEvent(participant);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
     @PutMapping("/update/{id}")

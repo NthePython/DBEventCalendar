@@ -9,7 +9,7 @@ spring:
     password: ${DB_PASSWORD}
   jpa:
     hibernate:
-      ddl-auto: create
+      ddl-auto: update
     show-sql: false
     properties:
       hibernate:
@@ -17,5 +17,18 @@ spring:
     database: postgresql
     open-in-view: off
     database-platform: org.hibernate.dialect.PostgreSQLDialect
+  mvc:
+    log-request-details: true
 server:
   port: 8080
+  servlet:
+    register-default-servlet: true
+logging:
+  level:
+    org:
+      springframework:
+        web:
+          filter:
+            CommonRequestLoggingFilter: TRACE
+    org.springframework.web: trace
+

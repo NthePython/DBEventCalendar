@@ -28,6 +28,13 @@ public class BalanceServiceImpl extends Service<Balance> {
         return ResponseEntity.ok(balance);
     }
 
+    public Balance getByUserId(Long id) {
+        if (id == null)
+            throw new IllegalArgumentException("Id is null");
+
+        return balanceRepository.findByUserId(id).orElseThrow(() -> new NoSuchElementException(id + " Balance not found"));
+    }
+
     @Override
     public ResponseEntity<?> save(Balance balance) {
         if (balance.getId() != null)

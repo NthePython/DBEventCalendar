@@ -1,14 +1,13 @@
 package uz.eventmngmnt.event_management.config;
 
-import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
 import uz.eventmngmnt.event_management.entity.*;
+import uz.eventmngmnt.event_management.entity.enums.Roles;
 import uz.eventmngmnt.event_management.repository.*;
 
-import java.sql.Time;
 import java.sql.Timestamp;
 
 @Component
@@ -20,19 +19,20 @@ public class AppInit implements ApplicationRunner {
     private final BalancesRepository balancesRepository;
     private final TransactionsRepository transactionsRepository;
 
-    @Override
-    public void run(ApplicationArguments args) {
+    private void init() {
         Users user = new Users();
         Events event = new Events();
         Participants participant = new Participants();
         Balance balance = new Balance();
         Transactions transaction = new Transactions();
 
-        user.setFirstName("John");
-        user.setLastName("Doe");
-        user.setEmail("example@example.com");
-        user.setPassword("123456");
+        user.setFirstName("First");
+        user.setLastName("Last");
         user.setPhoneNumber("+998901234567");
+        user.setEmail("2110021@newuu.uz");
+        user.setUsername("Username");
+        user.setPassword("Password");
+        user.setJoinedDate(new Timestamp(System.currentTimeMillis()));
         usersRepository.save(user);
 
         event.setName("Event");
@@ -45,6 +45,7 @@ public class AppInit implements ApplicationRunner {
 
         participant.setUserId(user.getId());
         participant.setEventId(event.getId());
+        participant.setRole(Roles.ORGANIZER);
         participantsRepository.save(participant);
 
         balance.setUserId(user.getId());
@@ -56,5 +57,14 @@ public class AppInit implements ApplicationRunner {
         transaction.setSum(10000.00);
         transaction.setBalanceId(balance.getId());
         transactionsRepository.save(transaction);
+    }
+
+    @Override
+    public void run(ApplicationArguments args) {
+        if (usersRepository.count() == 0 || eventsRepository.count() == 0 ||
+                participantsRepository.count() == 0 || balancesRepository.count() == 0
+                || transactionsRepository.count() == 0) {
+            init();
+        }
     }
 }
